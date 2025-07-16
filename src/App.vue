@@ -4,6 +4,7 @@ import SidebarMenu from './components/SidebarMenu.vue'
 import Home from './pages/Home.vue'
 import Perso from './pages/Perso.vue'
 import Combat from './pages/Combat.vue'
+import ChancePage from './pages/ChancePage.vue'
 
 const currentPage = ref('home')
 </script>
@@ -15,6 +16,7 @@ const currentPage = ref('home')
       <Home v-if="currentPage === 'home'" />
       <Perso v-else-if="currentPage === 'perso'" />
       <Combat v-else-if="currentPage === 'ennemis'" />
+      <ChancePage v-else-if="currentPage === 'chance'" />
     </main>
   </div>
 </template>
