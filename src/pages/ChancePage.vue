@@ -22,7 +22,7 @@
         <span v-if="bonusMalus">({{ result - bonusMalus >= 0 ? result + (bonusMalus >= 0 ? ' - ' : ' + ') + Math.abs(bonusMalus) : result + (bonusMalus >= 0 ? ' - ' : ' + ') + Math.abs(bonusMalus) }})</span>
         <br />Total : <b>{{ result + (Number(bonusMalus) || 0) }}</b>
         <br />Test de chance :
-        <span v-if="result + (Number(bonusMalus) || 0) < chanceInitiale">Raté !</span> <!-- Modifié ici -->
+        <span v-if="result + (Number(bonusMalus) || 0) < chanceInitiale">Raté !</span>
         <span v-else>Réussi !</span>
       </div>
       <div v-if="chance <= 0" class="chance-zero">Tu n'as plus de chance !</div>

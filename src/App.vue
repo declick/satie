@@ -29,7 +29,7 @@ const currentPage = ref('home')
 }
 .main-content {
   flex: 1;
-  padding: 1.2rem 1rem 90px 1rem; /* padding-bottom pour le menu */
+  padding: 1.2rem 1rem 90px 1rem;
   box-sizing: border-box;
   width: 100vw;
   max-width: 600px;
