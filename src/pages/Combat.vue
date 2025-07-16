@@ -47,24 +47,46 @@
         <div v-if="!combatFini">
           <div class="dice-block">
             <div class="dice-title">Tour {{ tour }}</div>
-            <div class="dice-label">Lancer pour l'ennemi :</div>
-            <div class="des-row">
-              <Dice :faces="6" v-model="de1Ennemi" :rolling="rollingEnnemi" :clickable="false" @roll-end="onRollEndEnnemi" />
-              <Dice :faces="6" v-model="de2Ennemi" :rolling="rollingEnnemi" :clickable="false" />
-            </div>
-            <button class="valider-btn" @click="lancerDesEnnemi" :disabled="rollingEnnemi || rollingHero">Lancer pour l'ennemi</button>
-            <div v-if="puissanceEnnemi !== null" class="dice-result">Puissance d'attaque ennemi : <b>{{ puissanceEnnemi }}</b></div>
-            <div v-if="puissanceEnnemi !== null">
-              <div class="dice-label">Lancer pour le héros :</div>
-              <div class="des-row">
-                <Dice :faces="6" v-model="de1Hero" :rolling="rollingHero" :clickable="false" @roll-end="onRollEndHero" />
-                <Dice :faces="6" v-model="de2Hero" :rolling="rollingHero" :clickable="false" />
+            <div v-if="puissanceEnnemi === null">
+              <div class="bonus-malus-row">
+                <label>Bonus/Malus ennemi :</label>
+                <input type="number" v-model.number="bonusMalusEnnemi" inputmode="numeric" class="bonus-malus-input" placeholder="+2 ou -1" />
               </div>
-              <button class="valider-btn" @click="lancerDesHero" :disabled="rollingHero">Lancer pour le héros</button>
-              <div v-if="puissanceHero !== null" class="dice-result">Puissance d'attaque héros : <b>{{ puissanceHero }}</b></div>
+              <div class="dice-label">Lancer pour l'ennemi :</div>
+              <div class="des-row">
+                <Dice :faces="6" v-model="de1Ennemi" :rolling="rollingEnnemi" :clickable="false" @roll-end="onRollEndEnnemi" />
+                <Dice :faces="6" v-model="de2Ennemi" :rolling="rollingEnnemi" :clickable="false" />
+              </div>
+              <button class="valider-btn" @click="lancerDesEnnemi" :disabled="rollingEnnemi || rollingHero">Lancer pour l'ennemi</button>
             </div>
-            <div v-if="roundResult" class="round-result">{{ roundResult }}</div>
-            <button v-if="puissanceHero !== null" class="valider-btn" @click="tourSuivant">Tour suivant</button>
+            <div v-else>
+              <div v-if="puissanceEnnemi !== null" class="dice-result">
+                Puissance d'attaque ennemi :
+                <b>{{ puissanceEnnemi }}</b>
+                <span v-if="bonusMalusEnnemi || bonusMalusEnnemi === 0"> ({{ scoreBrutEnnemi }} {{ bonusMalusEnnemi >= 0 ? '+' : '' }}{{ bonusMalusEnnemi }})</span>
+              </div>
+              <div v-if="puissanceHero === null">
+                <div class="bonus-malus-row">
+                  <label>Bonus/Malus héros :</label>
+                  <input type="number" v-model.number="bonusMalusHero" inputmode="numeric" class="bonus-malus-input" placeholder="+2 ou -1" />
+                </div>
+                <div class="dice-label">Lancer pour le héros :</div>
+                <div class="des-row">
+                  <Dice :faces="6" v-model="de1Hero" :rolling="rollingHero" :clickable="false" @roll-end="onRollEndHero" />
+                  <Dice :faces="6" v-model="de2Hero" :rolling="rollingHero" :clickable="false" />
+                </div>
+                <button class="valider-btn" @click="lancerDesHero" :disabled="rollingHero">Lancer pour le héros</button>
+              </div>
+              <div v-if="puissanceHero !== null">
+                <div v-if="puissanceHero !== null" class="dice-result">
+                  Puissance d'attaque héros :
+                  <b>{{ puissanceHero }}</b>
+                  <span v-if="bonusMalusHero || bonusMalusHero === 0"> ({{ scoreBrutHero }} {{ bonusMalusHero >= 0 ? '+' : '' }}{{ bonusMalusHero }})</span>
+                </div>
+                <div v-if="roundResult" class="round-result">{{ roundResult }}</div>
+                <button class="valider-btn" @click="tourSuivant">Tour suivant</button>
+              </div>
+            </div>
           </div>
         </div>
         <div v-else class="fin-combat">
@@ -102,6 +124,10 @@ const puissanceEnnemi = ref(null)
 const puissanceHero = ref(null)
 const roundResult = ref('')
 const combatFini = ref(false)
+const bonusMalusHero = ref(0)
+const bonusMalusEnnemi = ref(0)
+const scoreBrutEnnemi = ref(0)
+const scoreBrutHero = ref(0)
 
 // Charger depuis localStorage au démarrage
 onMounted(() => {
@@ -165,7 +191,8 @@ function lancerDesEnnemi() {
 }
 function onRollEndEnnemi() {
   setTimeout(() => {
-    puissanceEnnemi.value = de1Ennemi.value + de2Ennemi.value + ennemiHabilete.value
+    scoreBrutEnnemi.value = de1Ennemi.value + de2Ennemi.value + ennemiHabilete.value
+    puissanceEnnemi.value = scoreBrutEnnemi.value + (Number(bonusMalusEnnemi.value) || 0)
     rollingEnnemi.value = false
   }, 100)
 }
@@ -177,7 +204,8 @@ function lancerDesHero() {
 }
 function onRollEndHero() {
   setTimeout(() => {
-    puissanceHero.value = de1Hero.value + de2Hero.value + heroHabilete.value
+    scoreBrutHero.value = de1Hero.value + de2Hero.value + heroHabilete.value
+    puissanceHero.value = scoreBrutHero.value + (Number(bonusMalusHero.value) || 0)
     rollingHero.value = false
     // Résultat du round
     if (puissanceHero.value > puissanceEnnemi.value) {
@@ -425,6 +453,26 @@ select {
   font-weight: 700;
   font-size: 1.2em;
   margin: 1em 0;
+}
+.bonus-malus-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-bottom: 1em;
+  margin-top: 0.5em;
+}
+.bonus-malus-input {
+  width: 60px;
+  font-size: 1em;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  padding: 0.3em 0.7em;
+  background: #fff;
+  color: #222;
+}
+.bonus-malus-hint {
+  color: #888;
+  font-size: 0.95em;
 }
 @media (max-width: 500px) {
   .combat-page {

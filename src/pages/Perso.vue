@@ -33,28 +33,6 @@
         <input v-model="newEquip" @keyup.enter="addEquip" placeholder="Ajouter un objet..." />
         <button type="button" class="add-btn" @click="addEquip">Ajouter</button>
       </div>
-      <div class="list-block">
-        <label>Bonus</label>
-        <ul>
-          <li v-for="(item, i) in bonus" :key="i">
-            <span>{{ item }}</span>
-            <button type="button" @click="bonus.splice(i,1)">✕</button>
-          </li>
-        </ul>
-        <input v-model="newBonus" @keyup.enter="addBonus" placeholder="Ajouter un bonus..." />
-        <button type="button" class="add-btn" @click="addBonus">Ajouter</button>
-      </div>
-      <div class="list-block">
-        <label>Pénalité</label>
-        <ul>
-          <li v-for="(item, i) in penalite" :key="i">
-            <span>{{ item }}</span>
-            <button type="button" @click="penalite.splice(i,1)">✕</button>
-          </li>
-        </ul>
-        <input v-model="newPenalite" @keyup.enter="addPenalite" placeholder="Ajouter une pénalité..." />
-        <button type="button" class="add-btn" @click="addPenalite">Ajouter</button>
-      </div>
       <button class="valider-btn" @click="valide = true">Valider</button>
     </form>
     <div v-else class="recap">
@@ -95,22 +73,6 @@
             <li v-if="equipement.length === 0"><i>Aucun</i></li>
           </ul>
         </div>
-        <div class="recap-card">
-          <span class="recap-icon">✨</span>
-          <span class="recap-label">Bonus</span>
-          <ul>
-            <li v-for="(item, i) in bonus" :key="i">{{ item }}</li>
-            <li v-if="bonus.length === 0"><i>Aucun</i></li>
-          </ul>
-        </div>
-        <div class="recap-card">
-          <span class="recap-icon">⚠️</span>
-          <span class="recap-label">Pénalité</span>
-          <ul>
-            <li v-for="(item, i) in penalite" :key="i">{{ item }}</li>
-            <li v-if="penalite.length === 0"><i>Aucune</i></li>
-          </ul>
-        </div>
       </div>
       <button class="modifier-btn" @click="valide = false">Modifier</button>
     </div>
@@ -127,10 +89,6 @@ const or = ref(0)
 const provisions = ref(0)
 const equipement = ref([])
 const newEquip = ref('')
-const bonus = ref([])
-const newBonus = ref('')
-const penalite = ref([])
-const newPenalite = ref('')
 const valide = ref(false)
 
 // Charger depuis localStorage au démarrage
@@ -145,8 +103,6 @@ onMounted(() => {
       or.value = data.or ?? 0
       provisions.value = data.provisions ?? 0
       equipement.value = data.equipement ?? []
-      bonus.value = data.bonus ?? []
-      penalite.value = data.penalite ?? []
       valide.value = data.valide ?? false
     } catch {}
   }
@@ -154,7 +110,7 @@ onMounted(() => {
 
 // Sauvegarder à chaque modification
 watch([
-  habilete, endurance, chance, or, provisions, equipement, bonus, penalite, valide
+  habilete, endurance, chance, or, provisions, equipement, valide
 ], () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     habilete: habilete.value,
@@ -163,8 +119,6 @@ watch([
     or: or.value,
     provisions: provisions.value,
     equipement: equipement.value,
-    bonus: bonus.value,
-    penalite: penalite.value,
     valide: valide.value
   }))
 }, { deep: true })
@@ -173,18 +127,6 @@ function addEquip() {
   if (newEquip.value.trim()) {
     equipement.value.push(newEquip.value.trim())
     newEquip.value = ''
-  }
-}
-function addBonus() {
-  if (newBonus.value.trim()) {
-    bonus.value.push(newBonus.value.trim())
-    newBonus.value = ''
-  }
-}
-function addPenalite() {
-  if (newPenalite.value.trim()) {
-    penalite.value.push(newPenalite.value.trim())
-    newPenalite.value = ''
   }
 }
 </script>
