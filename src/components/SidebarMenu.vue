@@ -41,11 +41,11 @@ const props = defineProps({
 
 <style scoped>
 .pillnav {
-  width: 97vw;
+  width: 95vw;
   max-width: 500px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(24,25,28,0.85);
+  background: linear-gradient(135deg, #036e76, #2a2a2a);
   border-radius: 32px;
   color: #b6f09c;
   height: 64px;
@@ -54,10 +54,9 @@ const props = defineProps({
   display: flex;
   align-items: center;
   z-index: 100;
-  border: 1.5px solid #232323;
   transition: box-shadow 0.2s, background 0.2s;
   overflow-x: hidden;
-  box-shadow: 0 2px 8px #0002;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 0 1.2em;
 }
 ul {
@@ -68,7 +67,7 @@ ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  gap: 1.2em;
+  gap: 1em;
 }
 li {
   display: flex;
@@ -97,13 +96,12 @@ li.active .icon {
   display: flex;
   align-items: center;
   gap: 0.7em;
-  background: #b6f09c;
+  background: #ffffff;
   color: #18191c;
   border-radius: 22px;
-  padding: 0.45em 1em;
+  padding: 0.1em 1em;
   font-weight: 600;
   font-size: 1.08em;
-  box-shadow: 0 2px 8px #b6f09c33, 0 0 0 2px #b6f09c;
   min-width: 0;
   min-height: 0;
   border: 1.5px solid #eafbe0;
