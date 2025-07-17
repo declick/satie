@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import Dice from '../components/Dice.vue'
 const chance = ref(0)
 const chanceInitiale = ref(0)
@@ -41,6 +41,8 @@ const de2 = ref(1)
 const rolling = ref(false)
 const result = ref(null)
 const bonusMalus = ref(0)
+const fightLoss = ref(-2) // PV perdus en combat (défaut -2)
+const chanceLoss = ref(-1) // Points de chance perdus si échec (défaut -1)
 
 onMounted(() => {
   const saved = localStorage.getItem(STORAGE_KEY)
@@ -51,33 +53,48 @@ onMounted(() => {
       chanceInitiale.value = data.chanceInitiale ?? data.chance ?? 0
     } catch {}
   }
+  const savedRules = localStorage.getItem('rules')
+  if (savedRules) {
+    const data = JSON.parse(savedRules)
+    fightLoss.value = data.fightLoss ?? -2
+    chanceLoss.value = data.chanceLoss ?? -1
+  }
+})
+
+watch([fightLoss, chanceLoss], () => {
+  localStorage.setItem('rules', JSON.stringify({
+    fightLoss: fightLoss.value,
+    chanceLoss: chanceLoss.value
+  }))
 })
 
 function lancerChance() {
-  if (chance.value <= 0) return
+  if (chance.value <= 0) return // On bloque si plus de chance
   result.value = null
   rolling.value = true
   de1.value = Math.floor(Math.random() * 6) + 1 // force reroll
   de2.value = Math.floor(Math.random() * 6) + 1
 }
+
 function onRollEnd() {
   setTimeout(() => {
     result.value = de1.value + de2.value
     rolling.value = false
 
     const total = result.value + (Number(bonusMalus.value) || 0)
+    const rules = JSON.parse(localStorage.getItem('rules') || '{}')
+    const perteCombat = Number(rules.fightLoss) || -2
 
-    // Test de chance : diminuer la chance uniquement en cas d'échec
     if (total < chanceInitiale.value) { // Échec uniquement si le total est strictement inférieur
       if (chance.value > 0) {
-        chance.value--
+        chance.value += perteCombat // perte est négatif, donc on additionne
+        if (chance.value < 0) chance.value = 0
         // Sauvegarder dans localStorage
         const saved = localStorage.getItem(STORAGE_KEY)
         if (saved) {
           try {
             const data = JSON.parse(saved)
             data.chance = chance.value
-            // Toujours garder la valeur initiale si elle existe, sinon l'initialiser
             if (!('chanceInitiale' in data)) {
               data.chanceInitiale = chanceInitiale.value
             }

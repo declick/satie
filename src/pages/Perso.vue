@@ -171,16 +171,6 @@ function modifierPerso() {
     valide: false
   }))
 }
-
-function resetAdventure() {
-  adventureStarted.value = false;
-  localStorage.removeItem('adventureStarted');
-  localStorage.removeItem('feuille-perso-v1'); // fiche perso
-  localStorage.removeItem('ennemi-v1');        // fiche ennemi
-  // Ajoute ici toute autre clé liée à la partie si besoin
-  currentPage.value = 'home';
-  persoVersion.value++; // Force la recomputation de hasPerso
-}
 </script>
 
 <style scoped>

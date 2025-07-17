@@ -1,23 +1,34 @@
-// input combat
-// input chance
-
-
 <script setup>
-import { ref } from 'vue'
-const fight = ref('')
-const chance = ref('')
+import { ref, onMounted, watch } from 'vue'
+const fightLoss = ref(-2) // PV perdus en combat (défaut -2)
+const chanceLoss = ref(-1) // Points de chance perdus si échec (défaut -1)
+
+onMounted(() => {
+  const saved = localStorage.getItem('rules')
+  if (saved) {
+    const data = JSON.parse(saved)
+    fightLoss.value = data.fightLoss ?? -2
+    chanceLoss.value = data.chanceLoss ?? -1
+  }
+})
+
+watch([fightLoss, chanceLoss], () => {
+  localStorage.setItem('rules', JSON.stringify({
+    fightLoss: fightLoss.value,
+    chanceLoss: chanceLoss.value
+  }))
+})
 </script>
 
 <template>
   <div class="rules_page">
     <div class="input-row">
-      <label class="input-label" for="fight">Combat</label>
-      <input id="fight" v-model="fight" type="number" placeholder="Combat" />
+      <label class="input-label" for="fightLoss">PV perdus en combat</label>
+      <input id="fightLoss" v-model="fightLoss" type="number" placeholder="-2" />
     </div>
     <div class="input-row">
-      <label class="input-label" for="chance">Chance</label>
-      <input id="chance" v-model="chance" type="number" placeholder="Chance" />
-      
+      <label class="input-label" for="chanceLoss">Points de chance perdus si échec</label>
+      <input id="chanceLoss" v-model="chanceLoss" type="number" placeholder="-1" />
     </div>
   </div>
 </template>
@@ -58,41 +69,5 @@ input[type="number"] {
 input[type="number"]:focus {
   outline: 2px solid #b6f09c;
   border-color: #42b883;
-}
-.stats-cards {
-  display: flex;
-  flex-direction: row;
-  gap: 1.2em;
-  justify-content: center;
-  margin-top: 2em;
-}
-.rules-card {
-  background: #f8f8f8;
-  border-radius: 14px;
-  box-shadow: 0 2px 8px #b6f09c33;
-  padding: 1.2em 1em 1em 1em;
-  min-width: 90px;
-  min-height: 80px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1em;
-}
-.rule-icon {
-  font-size: 2em;
-  margin-bottom: 0.2em;
-  filter: drop-shadow(0 1px 2px #b6f09c33);
-}
-.rule-label {
-  font-size: 1em;
-  color: #42b883;
-  font-weight: 600;
-  margin-bottom: 0.1em;
-}
-.rule-value {
-  font-size: 1.3em;
-  font-weight: 700;
-  color: #222;
 }
 </style>
