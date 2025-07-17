@@ -140,7 +140,7 @@ function validerPerso() {
   const toast = useToast();
   if (endurance.value <= 0) {
     toast.error("L'endurance doit être supérieure à 0 pour valider le personnage.", {
-      position: "top-right", // ou "bottom-right", "top-center", etc.
+      position: "top-right",
       timeout: 3500
     });
     return;
