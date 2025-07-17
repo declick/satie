@@ -11,10 +11,10 @@
     </button>
     <button 
       @click="$emit('navigate', 'regle')" 
-      class="regle-button" 
+      class="rules-button" 
       :disabled="adventureStarted"
     >
-      Modifier les regle
+      Modifier les rules
     </button>
     <div class="illustration">
       <img src="https://www.vox-animae.com/wp-content/uploads/2023/10/Comportement-lapin.png" alt="Illustration du jeu" />

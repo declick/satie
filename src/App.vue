@@ -5,6 +5,7 @@ import Home from './pages/Home.vue'
 import Perso from './pages/Perso.vue'
 import Combat from './pages/Combat.vue'
 import ChancePage from './pages/ChancePage.vue'
+import Rules from './pages/Rules.vue'
 
 const currentPage = ref('home')
 const adventureStarted = ref(false)
@@ -61,6 +62,7 @@ function resetAdventure() {
       <Perso v-else-if="currentPage === 'perso'" @perso-valide="persoVersion++" />
       <Combat v-else-if="currentPage === 'ennemis'" @player-dead="resetAdventure" />
       <ChancePage v-else-if="currentPage === 'chance'" />
+      <Rules v-else-if="currentPage === 'regle'" />
     </main>
   </div>
 </template>
