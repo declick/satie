@@ -175,23 +175,15 @@ watch([
 
 // A modifier pour avoir toujours la stats du referentiel
 function demarrerCombat() {
-  ennemiHabilete.value = habilete.value
-  ennemiEndurance.value = endurance.value
-  // Recharger stats héros (au cas où modifiées)
-  const hero = localStorage.getItem(HERO_KEY)
-  if (hero) {
-    try {
-      const data = JSON.parse(hero)
-      heroHabilete.value = data.habilete ?? 0
-      heroEndurance.value = data.endurance ?? 0
-    } catch {}
-  }
-  tour.value = 1
-  puissanceEnnemi.value = null
-  puissanceHero.value = null
-  roundResult.value = ''
-  combatFini.value = false
-  combatEnCours.value = true
+  // Récupère les valeurs du héros depuis la fiche Perso (ou localStorage si tu les y stockes)
+  // Par exemple, si tu veux juste utiliser les règles :
+  const rules = JSON.parse(localStorage.getItem('rules') || '{}');
+  // Utilise les règles pour le combat
+  // ... (initialise les variables du combat si besoin)
+  combatEnCours.value = true;
+  combatFini.value = false;
+  tour.value = 1;
+  // etc.
 }
 function lancerDesEnnemi() {
   puissanceEnnemi.value = null
@@ -224,35 +216,37 @@ function onRollEndHero() {
     const rules = JSON.parse(localStorage.getItem('rules') || '{}')
     const perteCombat = Number(rules.fightLoss) || -2
 
-    // Résultat du round
+    // Appliquer les dégâts du round
     if (puissanceHero.value > puissanceEnnemi.value) {
       // Le héros gagne : SEUL l'ennemi perd de l'endurance
-      ennemiEndurance.value += perteCombat // perteCombat est négatif
-      roundResult.value = `L'ennemi perd ${-perteCombat} point(s) d'endurance !`;
+      ennemiEndurance.value += perteCombat
+      if (ennemiEndurance.value <= 0) {
+        roundResult.value = "L'ennemi est vaincu !";
+        combatFini.value = true;
+        return;
+      } else {
+        roundResult.value = `L'ennemi perd ${-perteCombat} point(s) d'endurance !`;
+      }
     } else if (puissanceHero.value < puissanceEnnemi.value) {
       // Le héros perd : SEUL le héros perd de l'endurance
       heroEndurance.value += perteCombat
-      roundResult.value = `Le héros perd ${-perteCombat} point(s) d'endurance !`;
-    } else {
-      // Égalité, personne ne perd de vie
-      roundResult.value = 'Égalité, personne ne perd de vie.';
-    }
-
-    // Fin combat ?
-    if (ennemiEndurance.value <= 0 || heroEndurance.value <= 0) {
-      combatFini.value = true
-      // Sauvegarder la nouvelle endurance du héros
-      const hero = localStorage.getItem(HERO_KEY)
-      if (hero) {
-        try {
-          const data = JSON.parse(hero)
-          data.endurance = heroEndurance.value
-          localStorage.setItem(HERO_KEY, JSON.stringify(data))
-        } catch {}
-      }
       if (heroEndurance.value <= 0) {
-        emit('player-dead')
+        roundResult.value = "Le héros est vaincu !";
+        combatFini.value = true;
+        // Mettre à jour la fiche du héros (endurance à 0)
+        localStorage.setItem('feuille-perso-v1', JSON.stringify({
+          endurance: 0
+        }));
+        return;
+      } else {
+        roundResult.value = `Le héros perd ${-perteCombat} point(s) d'endurance !`;
+        // Mettre à jour la fiche du héros (endurance restante)
+        const feuille = JSON.parse(localStorage.getItem('feuille-perso-v1') || '{}');
+        feuille.endurance = heroEndurance.value > 0 ? heroEndurance.value : 0;
+        localStorage.setItem('feuille-perso-v1', JSON.stringify(feuille));
       }
+    } else {
+      roundResult.value = 'Égalité, personne ne perd de vie.';
     }
   }, 100)
 }
@@ -263,56 +257,25 @@ function tourSuivant() {
   roundResult.value = ''
 }
 function resetCombat() {
-  // Réinitialiser la fiche perso
-  localStorage.setItem('feuille-perso-v1', JSON.stringify({
-    habilete: 10,
-    endurance: 10,
-    chance: 6,
-    or: 0,
-    provisions: 0,
-    equipement: [],
-    valide: false
-  }))
-  // Réinitialiser les règles par défaut
-  localStorage.setItem('rules', JSON.stringify({
-    fightLoss: -2,
-    chanceLoss: -1
-  }))
-
-  // Réinitialise toutes les variables du combat
-  habilete.value = 0
-  endurance.value = 0
-  valide.value = false
-  combatEnCours.value = false
-  tour.value = 1
-  ennemiHabilete.value = 0
-  ennemiEndurance.value = 0
-  heroHabilete.value = 0
-  heroEndurance.value = 0
-  de1Ennemi.value = 1
-  de2Ennemi.value = 1
-  de1Hero.value = 1
-  de2Hero.value = 1
-  rollingEnnemi.value = false
-  rollingHero.value = false
-  puissanceEnnemi.value = null
-  puissanceHero.value = null
-  roundResult.value = ''
-  combatFini.value = false
-  bonusMalusHero.value = 0
-  bonusMalusEnnemi.value = 0
-  scoreBrutEnnemi.value = 0
-  scoreBrutHero.value = 0
-
-  // Recharge les stats du héros depuis le localStorage (remis à zéro à la mort)
-  const hero = localStorage.getItem(HERO_KEY)
-  if (hero) {
-    try {
-      const data = JSON.parse(hero)
-      heroHabilete.value = data.habilete ?? 0
-      heroEndurance.value = data.endurance ?? 0
-    } catch {}
-  }
+  valide.value = false;
+  combatEnCours.value = false;
+  combatFini.value = false;
+  tour.value = 1;
+  ennemiHabilete.value = 0;
+  ennemiEndurance.value = 0;
+  de1Ennemi.value = 1;
+  de2Ennemi.value = 1;
+  de1Hero.value = 1;
+  de2Hero.value = 1;
+  rollingEnnemi.value = false;
+  rollingHero.value = false;
+  puissanceEnnemi.value = null;
+  puissanceHero.value = null;
+  roundResult.value = '';
+  bonusMalusHero.value = 0;
+  bonusMalusEnnemi.value = 0;
+  scoreBrutEnnemi.value = 0;
+  scoreBrutHero.value = 0;
 }
 </script>
 
