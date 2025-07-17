@@ -8,21 +8,24 @@
         </span>
         <span v-else class="icon home">🏠</span>
       </li>
-      <li :class="{ active: current === 'perso' }" @click="$emit('navigate', 'perso')">
+      <li :class="[{ active: current === 'perso' }, { disabled: !adventureStarted }]"
+          @click="adventureStarted && $emit('navigate', 'perso')">
         <span class="pill" v-if="current === 'perso'">
           <span class="icon perso">🎲</span>
           <span class="label">Perso</span>
         </span>
         <span v-else class="icon perso">🎲</span>
       </li>
-      <li :class="{ active: current === 'ennemis' }" @click="$emit('navigate', 'ennemis')">
+      <li :class="[{ active: current === 'ennemis' }, { disabled: !adventureStarted || !hasPerso }]"
+          @click="adventureStarted && hasPerso && $emit('navigate', 'ennemis')">
         <span class="pill" v-if="current === 'ennemis'">
           <span class="icon ennemis">👹</span>
-          <span class="label">Ennemis</span>
+          <span class="label">Combats</span>
         </span>
         <span v-else class="icon ennemis">👹</span>
       </li>
-      <li :class="{ active: current === 'chance' }" @click="$emit('navigate', 'chance')">
+      <li :class="[{ active: current === 'chance' }, { disabled: !adventureStarted || !hasPerso }]"
+          @click="adventureStarted && hasPerso && $emit('navigate', 'chance')">
         <span class="pill" v-if="current === 'chance'">
           <span class="icon chance">🍀</span>
           <span class="label">Chance</span>
@@ -34,12 +37,16 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 const props = defineProps({
-  current: { type: String, default: 'home' }
+  current: { type: String, default: 'home' },
+  adventureStarted: { type: Boolean, default: false },
+  hasPerso: { type: Boolean, default: false }
 })
 </script>
 
 <style scoped>
+
 .pillnav {
   width: 95vw;
   max-width: 500px;
@@ -50,7 +57,9 @@ const props = defineProps({
   color: #b6f09c;
   height: 64px;
   position: fixed;
+  /* Par défaut, menu en bas */
   bottom: 18px;
+  top: auto;
   display: flex;
   align-items: center;
   z-index: 100;
@@ -128,6 +137,11 @@ li.active .icon {
 li:not(.active) .label {
   display: none;
 }
+.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(1);
+}
 @media (max-width: 500px) {
   .pillnav {
     height: 54px;
@@ -147,6 +161,14 @@ li:not(.active) .label {
   }
   .label {
     font-size: 0.85em;
+  }
+}
+
+/* Sur desktop, place le menu en haut */
+@media (min-width: 900px) {
+  .pillnav {
+    top: 18px;
+    bottom: auto;
   }
 }
 </style> 

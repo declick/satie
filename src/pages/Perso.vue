@@ -33,7 +33,8 @@
         <input v-model="newEquip" @keyup.enter="addEquip" placeholder="Ajouter un objet..." />
         <button type="button" class="add-btn" @click="addEquip">Ajouter</button>
       </div>
-      <button class="valider-btn" @click="valide = true">Valider</button>
+      <button class="valider-btn" @click="validerPerso">Valider</button>
+      <p v-if="erreur" class="erreur-message">{{ erreur }}</p>
     </form>
     <div v-else class="recap">
       <h2>Stats du héro</h2>
@@ -74,13 +75,17 @@
           </ul>
         </div>
       </div>
-      <button class="modifier-btn" @click="valide = false">Modifier</button>
+      <button class="modifier-btn" @click="modifierPerso">Modifier</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
+import Swal from 'sweetalert2'
+import { useToast } from "vue-toastification";
+
+const emit = defineEmits(['perso-valide'])
 const STORAGE_KEY = 'feuille-perso-v1'
 const habilete = ref(0)
 const endurance = ref(0)
@@ -90,6 +95,7 @@ const provisions = ref(0)
 const equipement = ref([])
 const newEquip = ref('')
 const valide = ref(false)
+const erreur = ref('')
 
 // Charger depuis localStorage au démarrage
 onMounted(() => {
@@ -128,6 +134,52 @@ function addEquip() {
     equipement.value.push(newEquip.value.trim())
     newEquip.value = ''
   }
+}
+
+function validerPerso() {
+  const toast = useToast();
+  if (endurance.value <= 0) {
+    toast.error("L'endurance doit être supérieure à 0 pour valider le personnage.", {
+      position: "top-right", // ou "bottom-right", "top-center", etc.
+      timeout: 3500
+    });
+    return;
+  }
+  erreur.value = ''
+  valide.value = true
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    habilete: habilete.value,
+    endurance: endurance.value,
+    chance: chance.value,
+    or: or.value,
+    provisions: provisions.value,
+    equipement: equipement.value,
+    valide: true
+  }))
+  emit('perso-valide')
+}
+
+function modifierPerso() {
+  valide.value = false
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    habilete: habilete.value,
+    endurance: endurance.value,
+    chance: chance.value,
+    or: or.value,
+    provisions: provisions.value,
+    equipement: equipement.value,
+    valide: false
+  }))
+}
+
+function resetAdventure() {
+  adventureStarted.value = false;
+  localStorage.removeItem('adventureStarted');
+  localStorage.removeItem('feuille-perso-v1'); // fiche perso
+  localStorage.removeItem('ennemi-v1');        // fiche ennemi
+  // Ajoute ici toute autre clé liée à la partie si besoin
+  currentPage.value = 'home';
+  persoVersion.value++; // Force la recomputation de hasPerso
 }
 </script>
 
@@ -350,6 +402,12 @@ form {
 .recap-card li {
   margin-bottom: 0.2em;
   font-size: 0.98em;
+}
+.erreur-message {
+  color: #e44e6e;
+  font-weight: bold;
+  margin-top: 0.7em;
+  text-align: center;
 }
 @media (max-width: 500px) {
   .feuille-perso {

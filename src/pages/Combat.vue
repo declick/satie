@@ -103,6 +103,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import Dice from '../components/Dice.vue'
+const emit = defineEmits(['player-dead'])
 const STORAGE_KEY = 'ennemi-v1'
 const HERO_KEY = 'feuille-perso-v1'
 const habilete = ref(0)
@@ -162,6 +163,7 @@ watch([
   }))
 }, { deep: true })
 
+// A modifier pour avoir toujours la stats du referentiel
 function demarrerCombat() {
   ennemiHabilete.value = habilete.value
   ennemiEndurance.value = endurance.value
@@ -228,6 +230,10 @@ function onRollEndHero() {
           data.endurance = heroEndurance.value
           localStorage.setItem(HERO_KEY, JSON.stringify(data))
         } catch {}
+      }
+      // Si le héros est mort, prévenir le parent
+      if (heroEndurance.value <= 0) {
+        emit('player-dead')
       }
     }
   }, 100)
