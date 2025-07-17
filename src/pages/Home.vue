@@ -1,3 +1,13 @@
+<script setup>
+//import { ref } from 'vue';
+
+defineEmits(['navigate', 'perso', 'rule']);
+defineProps({
+  adventureStarted: Boolean
+})
+
+</script>
+
 <template>
   <div class="home-page">
     <h1 class="title">Carnet d'un héro</h1>
@@ -21,19 +31,6 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: "Home",
-  props: {
-    adventureStarted: {
-      type: Boolean,
-      default: false
-    }
-  }
-};
-
-</script>
 
 <style scoped>
 .home-page {
