@@ -103,6 +103,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import Dice from '../components/Dice.vue'
+import { useRouter } from 'vue-router'
 const emit = defineEmits(['player-dead'])
 const STORAGE_KEY = 'ennemi-v1'
 const HERO_KEY = 'feuille-perso-v1'
@@ -131,6 +132,7 @@ const scoreBrutEnnemi = ref(0)
 const scoreBrutHero = ref(0)
 const fightLoss = ref(-2) // Valeur par défaut à -2
 const chanceLoss = ref(-1) // Valeur par défaut à -1
+const router = useRouter()
 
 // Charger depuis localStorage au démarrage
 onMounted(() => {
@@ -180,11 +182,13 @@ function demarrerCombat() {
   const rules = JSON.parse(localStorage.getItem('rules') || '{}');
   // Utilise les règles pour le combat
   // ... (initialise les variables du combat si besoin)
+  ennemiHabilete.value = habilete.value;
+  ennemiEndurance.value = endurance.value;
   combatEnCours.value = true;
   combatFini.value = false;
   tour.value = 1;
-  // etc.
 }
+
 function lancerDesEnnemi() {
   puissanceEnnemi.value = null
   puissanceHero.value = null
@@ -256,6 +260,7 @@ function tourSuivant() {
   puissanceHero.value = null
   roundResult.value = ''
 }
+
 function resetCombat() {
   valide.value = false;
   combatEnCours.value = false;
@@ -277,6 +282,12 @@ function resetCombat() {
   scoreBrutEnnemi.value = 0;
   scoreBrutHero.value = 0;
 }
+
+watch(endurance, (newVal) => {
+  if (newVal <= 0) {
+    router.push({ name: 'Home' }) // ou { path: '/' } selon ta config
+  }
+})
 </script>
 
 <style scoped>
